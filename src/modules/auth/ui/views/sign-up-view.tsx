@@ -19,7 +19,6 @@ import { Alert, AlertTitle } from '@/components/ui/alert';
 import { OctagonAlertIcon, } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { authClient } from '@/lib/auth-client';
 import { LoadingButton } from '@/components/loader-btn';
 
@@ -36,7 +35,6 @@ const formSchema = z.object({
 );
 
 export const SignUpView = () => {
-  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
@@ -59,11 +57,32 @@ export const SignUpView = () => {
         name: data.name,
         email: data.email,
         password: data.password,
+        callbackURL: "/",
       },
       {
         onSuccess: () => {
           setPending(false);
-          router.push("/");
+        },
+        onError: ({ error }) => {
+          setPending(false);
+          setError(error.message);
+        }
+      },
+    );
+  };
+
+  const onSubmitSocial = (provider: "github" | "google") => {
+    setError(null);
+    setPending(true);
+
+    authClient.signIn.social(
+      {
+        provider: provider,
+        callbackURL: "/",
+      },
+      {
+        onSuccess: () => {
+          setPending(false);
         },
         onError: ({ error }) => {
           setPending(false);
@@ -195,6 +214,7 @@ export const SignUpView = () => {
                     type='button'
                     className='w-full'
                     disabled={pending}
+                    onClick={() => onSubmitSocial("google")}
                   >
                     Google
                   </Button>
@@ -203,11 +223,7 @@ export const SignUpView = () => {
                     type='button'
                     className='w-full'
                     disabled={pending}
-                    onClick={() => {
-                      authClient.signIn.social({
-                        provider: "github",
-                      })
-                    }}
+                    onClick={() => onSubmitSocial("github")}
                   >
                     Github
                   </Button>
