@@ -21,6 +21,8 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { authClient } from '@/lib/auth-client';
 import { LoadingButton } from '@/components/loader-btn';
+import { useRouter } from 'next/navigation';
+import { FaGithub, FaGoogle } from "react-icons/fa";
 
 const formSchema = z.object({
   name: z.string().min(1, { message: "Name is required" }),
@@ -35,6 +37,7 @@ const formSchema = z.object({
 );
 
 export const SignUpView = () => {
+  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
@@ -62,6 +65,7 @@ export const SignUpView = () => {
       {
         onSuccess: () => {
           setPending(false);
+          router.push("/");
         },
         onError: ({ error }) => {
           setPending(false);
@@ -216,6 +220,7 @@ export const SignUpView = () => {
                     disabled={pending}
                     onClick={() => onSubmitSocial("google")}
                   >
+                    <FaGoogle />
                     Google
                   </Button>
                   <Button
@@ -225,6 +230,7 @@ export const SignUpView = () => {
                     disabled={pending}
                     onClick={() => onSubmitSocial("github")}
                   >
+                    <FaGithub />
                     Github
                   </Button>
                 </div>
