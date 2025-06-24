@@ -26,7 +26,7 @@ export const DashboardUserButton = () => {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger className="rounded-lg border border-border/10 p-3 w-full
-            flex items-center justify-between bg-white/5 hover:bg-white/10 overflow-hidden">
+            flex items-center justify-between bg-white/5 hover:bg-white/10 overflow-hidden gap-2">
                 {
                     data.user.image ? (
                         <Avatar>
