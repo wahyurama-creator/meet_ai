@@ -3,13 +3,31 @@
 import { Button } from "@/components/ui/button";
 import { useSidebar } from "@/components/ui/sidebar";
 import { PanelLeftCloseIcon, PanelLeftIcon, SearchIcon } from "lucide-react";
+import { DashboardCommand } from "./dashboard-command";
+import { useEffect, useState } from "react";
 
 const DashboardNavbar = () => {
     const { isMobile, toggleSidebar, state } = useSidebar();
+    const [commandOpen, setCommandOpen] = useState(false);
+
+    useEffect(() => {
+        const down = (e: KeyboardEvent) => {
+            if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
+                e.preventDefault();
+                setCommandOpen((isOpen) => !isOpen);
+            }
+        };
+
+        document.addEventListener("keydown", down);
+        return () => document.removeEventListener("keydown", down);
+    }, []);
 
     return (
         <>
-            <DashboardCommand />
+            <DashboardCommand
+                open={commandOpen}
+                setOpen={setCommandOpen}
+            />
             <nav className="flex p-4 gap-x-2 items-center py-3 border-b bg-background">
                 <Button
                     onClick={toggleSidebar}
@@ -26,7 +44,7 @@ const DashboardNavbar = () => {
                         hover:text-muted-foreground"
                     variant={"outline"}
                     size={"sm"}
-                    onClick={() => { }}
+                    onClick={() => { setCommandOpen((isOpen) => !isOpen); }}
                 >
                     <SearchIcon />
                     Search
