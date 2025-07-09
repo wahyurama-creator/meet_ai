@@ -52,8 +52,8 @@ export const AgentsDetailHeader = ({
                         <PencilIcon className="size-4 text-black" />
                         Edit
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={onDelete} className="bg-red-500 text-white">
-                        <TrashIcon className="size-4 text-white" />
+                    <DropdownMenuItem onClick={onDelete}>
+                        <TrashIcon className="size-4 text-black" />
                         Delete
                     </DropdownMenuItem>
                 </DropdownMenuContent>
