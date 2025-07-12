@@ -50,6 +50,7 @@ export const CommandSelect = ({
                 <ChevronsUpDownIcon />
             </Button>
             <CommandResponsiveDialog
+                shouldFilter={!onSearch}
                 open={isOpen}
                 onOpenChange={setIsOpen}
             >
