@@ -1,10 +1,11 @@
 import { db } from "@/db";
-import { meetings } from "@/db/schema";
+import { agents, meetings } from "@/db/schema";
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import { z } from "zod";
 import { and, count, desc, eq, getTableColumns, ilike } from "drizzle-orm";
 import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, MIN_PAGE_SIZE } from "@/constants";
 import { TRPCError } from "@trpc/server";
+import { meetingsInsertSchema, meetingsUpdateSchema } from "../schemas";
 
 export const meetingsRouter = createTRPCRouter({
     /**
@@ -90,5 +91,49 @@ export const meetingsRouter = createTRPCRouter({
                 total: total.count,
                 totalPages
             };
+        }),
+    /**
+     * Creates a new meeting for the current user.
+     * Input: Meeting details (see meetingsInsertSchema).
+     * Returns: The created meeting object.
+     */
+    create: protectedProcedure.input(meetingsInsertSchema)
+        .mutation(async ({ input, ctx }) => {
+            const [createdMeeting] = await db
+                .insert(meetings)
+                .values({
+                    ...input,
+                    userId: ctx.auth.user.id,
+                })
+                .returning();
+
+            return createdMeeting;
+        }),
+    /**
+     * Updates an existing meeting for the current user.
+     * Input: Meeting details (see meetingsUpdateSchema).
+     * Returns: The updated meeting object.
+     */
+    update: protectedProcedure.input(meetingsUpdateSchema)
+        .mutation(async ({ input, ctx }) => {
+            const [updatedMeeting] = await db
+                .update(meetings)
+                .set(input)
+                .where(
+                    and(
+                        eq(meetings.id, input.id),
+                        eq(meetings.userId, ctx.auth.user.id),
+                    ),
+                )
+                .returning();
+
+            if (!updatedMeeting) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: `Meeting with ID ${input.id} not found.`,
+                });
+            }
+
+            return updatedMeeting;
         }),
 });
