@@ -1,5 +1,5 @@
 const MeetingPage = () => {
-    return <div>Meeting</div>;
+    return <div>Meeting Details</div>;
 };
 
 export default MeetingPage;
