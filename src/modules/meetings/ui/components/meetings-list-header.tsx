@@ -5,9 +5,24 @@ import { PlusIcon, XCircleIcon } from "lucide-react";
 import { useState } from "react";
 import { NewMeetingDialog } from "./new-meeting-dialog";
 import { MeetingsSearchFilter } from "./meetings-search-filter";
+import { StatusFilter } from "./status-filter";
+import { AgentIdFilter } from "./agent-id-filter";
+import { useMeetingsFilter } from "../../hooks/use-meetings-filter";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 export const MeetingsListHeader = () => {
     const [isOpen, setIsOpen] = useState(false);
+    const [filters, setFilters] = useMeetingsFilter();
+
+    const isAnyFilterModified = !!filters.agentId || !!filters.status || !!filters.search;
+    const onClearFilters = () => {
+        setFilters({
+            status: null,
+            agentId: "",
+            search: "",
+            page: 1,
+        });
+    };
 
     return (
         <>
@@ -25,9 +40,25 @@ export const MeetingsListHeader = () => {
                         New Meeting
                     </Button>
                 </div>
-                <div className="flex items-center gap-x-2 p-1">
-                    <MeetingsSearchFilter />
-                </div>
+                <ScrollArea>
+                    <div className="flex items-center gap-x-2 p-1">
+                        <MeetingsSearchFilter />
+                        <StatusFilter />
+                        <AgentIdFilter />
+                        {
+                            isAnyFilterModified && (
+                                <Button
+                                    variant={"outline"}
+                                    onClick={onClearFilters}
+                                >
+                                    <XCircleIcon className="size-4" />
+                                    Clear
+                                </Button>
+                            )
+                        }
+                    </div>
+                    <ScrollBar orientation="horizontal" />
+                </ScrollArea>
             </div>
         </>
     );
