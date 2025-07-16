@@ -10,6 +10,10 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useState } from "react";
 import { UpdateMeetingDialog } from "../components/update-meeting-dialog";
+import { UpcomingState } from "../components/upcoming-state";
+import { ActiveState } from "../components/active-state";
+import { CancelledState } from "../components/cancelled-state";
+import { ProcessingState } from "../components/processing-state";
 
 interface MeetingsDetailViewProps {
     meetingId: string;
@@ -25,6 +29,12 @@ export const MeetingsDetailView = ({ meetingId }: MeetingsDetailViewProps) => {
     const { data } = useSuspenseQuery(
         trpc.meetings.getOne.queryOptions({ id: meetingId }),
     );
+
+    const isActive = data.meetingStatus === "active";
+    const isUpcoming = data.meetingStatus === "upcoming";
+    const isCancelled = data.meetingStatus === "cancelled";
+    const isCompleted = data.meetingStatus === "completed";
+    const isProcessing = data.meetingStatus === "processing";
 
     const removeMeeting = useMutation(
         trpc.meetings.remove.mutationOptions({
@@ -69,6 +79,17 @@ export const MeetingsDetailView = ({ meetingId }: MeetingsDetailViewProps) => {
                     onEdit={() => setIsUpdateMeetingDialogOpen(true)}
                     onDelete={handleRemoveMeeting}
                 />
+                {isUpcoming && (
+                    <UpcomingState
+                        meetingId={meetingId}
+                        onCancelMeeting={handleRemoveMeeting}
+                        isCancelling={removeMeeting.isPending}
+                    />
+                )}
+                {isActive && (<ActiveState meetingId={meetingId} />)}
+                {isCancelled && (<CancelledState />)}
+                {isProcessing && (<ProcessingState />)}
+                {isCompleted && (<div>Completed</div>)}
             </div>
         </>
     );
