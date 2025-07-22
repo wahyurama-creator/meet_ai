@@ -69,6 +69,7 @@ export const meetingStatus = pgEnum("meeting_status", [
   "completed",
   "processing",
   "cancelled",
+  "failed",
 ]);
 
 export const meetings = pgTable("meetings", {
@@ -87,6 +88,7 @@ export const meetings = pgTable("meetings", {
       onDelete: 'cascade',
     }),
   meetingStatus: meetingStatus('meeting_status').notNull().default('upcoming'),
+  errorDescription: text("error_description"),
   instructions: text('instructions'),
   startedAt: timestamp('started_at'),
   endedAt: timestamp('ended_at'),

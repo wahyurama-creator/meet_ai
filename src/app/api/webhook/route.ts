@@ -15,6 +15,7 @@ export async function POST(request: NextRequest) {
     const apiKey = request.headers.get("x-api-key");
 
     if (!signature || !apiKey) {
+        console.log('invalidCredentials');
         return NextResponse.json(
             { error: "Missing signature or api key" },
             { status: 400 },
@@ -82,14 +83,14 @@ export async function POST(request: NextRequest) {
             })
             .where(
                 eq(meetings.id, meetingId),
-            )
+            );
 
         const [existingAgent] = await db
             .select()
             .from(agents)
             .where(
                 eq(agents.id, existingMeeting.agentId)
-            )
+            );
 
         if (!existingAgent) {
             return NextResponse.json(
@@ -110,7 +111,7 @@ export async function POST(request: NextRequest) {
         });
     } else if (eventType === "call.session_participant_left") {
         const event = payload as CallSessionParticipantLeftEvent;
-        const meetingId = event.call_cid.split(".")[1];
+        const meetingId = event.call_cid.split(":")[1];
 
         if (!meetingId) {
             return NextResponse.json(
@@ -146,7 +147,7 @@ export async function POST(request: NextRequest) {
             )
     } else if (eventType === "call.transcription_ready") {
         const event = payload as CallTranscriptionReadyEvent;
-        const meetingId = event.call_cid?.split(".")[1];
+        const meetingId = event.call_cid?.split(":")[1];
 
         if (!meetingId) {
             return NextResponse.json(
@@ -170,7 +171,6 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // TODO: Process the transcript
         await inngest.send({
             name: "meetings/processing",
             data: {
@@ -180,7 +180,7 @@ export async function POST(request: NextRequest) {
         });
     } else if (eventType === "call.recording_ready") {
         const event = payload as CallRecordingReadyEvent;
-        const meetingId = event.call_cid?.split(".")[1];
+        const meetingId = event.call_cid?.split(":")[1];
 
         await db
             .update(meetings)

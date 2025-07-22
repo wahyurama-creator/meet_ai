@@ -15,6 +15,7 @@ import { ActiveState } from "../components/active-state";
 import { CancelledState } from "../components/cancelled-state";
 import { ProcessingState } from "../components/processing-state";
 import { CompletedState } from "../components/completed-state";
+import { FailedState } from "../components/failed-state";
 
 interface MeetingsDetailViewProps {
     meetingId: string;
@@ -36,6 +37,7 @@ export const MeetingsDetailView = ({ meetingId }: MeetingsDetailViewProps) => {
     const isCancelled = data.meetingStatus === "cancelled";
     const isCompleted = data.meetingStatus === "completed";
     const isProcessing = data.meetingStatus === "processing";
+    const isFailed = data.meetingStatus === "failed";
 
     const removeMeeting = useMutation(
         trpc.meetings.remove.mutationOptions({
@@ -91,6 +93,7 @@ export const MeetingsDetailView = ({ meetingId }: MeetingsDetailViewProps) => {
                 {isCancelled && (<CancelledState />)}
                 {isProcessing && (<ProcessingState />)}
                 {isCompleted && (<CompletedState data={data} />)}
+                {isFailed && (<FailedState data={data} />)}
             </div>
         </>
     );

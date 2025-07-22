@@ -4,7 +4,7 @@ import JSONL from "jsonl-parse-stringify";
 import { db } from "@/db";
 import { agents, meetings, user } from "@/db/schema";
 import { eq, inArray } from "drizzle-orm";
-import { createAgent, openai, TextMessage } from "@inngest/agent-kit";
+import { Agent, AgentResult, createAgent, openai, StateData, TextMessage } from "@inngest/agent-kit";
 
 const summarizer = createAgent({
     name: "summarizer",
@@ -31,12 +31,12 @@ const summarizer = createAgent({
     `.trim(),
     model: openai({
         model: "gpt-4o",
-        apiKey: process.env.OPEN_AI_API_KEY!,
+        apiKey: process.env.OPEN_AI_KEY!,
     })
 });
 
 export const meetingsProcessing = inngest.createFunction(
-    { id: "meetings/processing" },
+    { id: "meetings/processing", retries: 0, },
     { event: "meetings/processing" },
     async ({ event, step }) => {
         const response = await step.run("fetch-transcript", async () => {
@@ -89,16 +89,44 @@ export const meetingsProcessing = inngest.createFunction(
             })
         });
 
-        const { output } = await summarizer.run(
-            "Summarize the following transcript: " +
-            JSON.stringify(transcriptWithSpeakers)
-        )
+        let agent: AgentResult;
+
+        try {
+            agent = await summarizer.run(
+                "Summarize the following transcript: " +
+                JSON.stringify(transcriptWithSpeakers)
+            )
+        } catch (error: any) {
+            let errorMessage: string = "Unknown error occured";
+
+            try {
+                if (typeof error.stack === "string") {
+                    const parsed = JSON.parse(error.stack);
+                    errorMessage = parsed?.error?.message || error.stack;
+                } else if (error.message) {
+                    errorMessage = error.message;
+                }
+            } catch (e) {
+                errorMessage = error?.message || "Unparsable error";
+            }
+
+            await step.run("mark-failed", async () => {
+                await db
+                    .update(meetings)
+                    .set({
+                        meetingStatus: "failed",
+                        errorDescription: errorMessage,
+                    })
+                    .where(eq(meetings.id, event.data.meetingId));
+            });
+            return;
+        }
 
         await step.run("save-summary", async () => {
             await db
                 .update(meetings)
                 .set({
-                    summary: (output[0] as TextMessage).content as string,
+                    summary: (agent.output[0] as TextMessage).content as string,
                     meetingStatus: "completed",
                 })
                 .where(
