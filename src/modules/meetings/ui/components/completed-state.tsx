@@ -8,6 +8,8 @@ import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { formatDuration } from "@/lib/utils";
 import Markdown from "react-markdown";
+import { Transcript } from "./transcript";
+import { ChatProvider } from "./chat-provider";
 
 interface Props {
     data: MeetingGetOne;
@@ -22,28 +24,28 @@ export const CompletedState = ({ data }: Props) => {
                         <TabsList className="p-0 bg-background justify-start rounded-none h-13">
                             <TabsTrigger
                                 value="summary"
-                                className="data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-b-primary data-[state=active]:text-accent-foreground h-full hover:text-accent-foreground"
+                                className="data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-b-primary data-[state=active]:text-accent-foreground h-full hover:text-accent-foreground"
                             >
                                 <BookOpenTextIcon />
                                 Summary
                             </TabsTrigger>
                             <TabsTrigger
                                 value="transcript"
-                                className="data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-b-primary data-[state=active]:text-accent-foreground h-full hover:text-accent-foreground"
+                                className="data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-b-primary data-[state=active]:text-accent-foreground h-full hover:text-accent-foreground"
                             >
                                 <FileTextIcon />
                                 Transcript
                             </TabsTrigger>
                             <TabsTrigger
                                 value="recording"
-                                className="data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-b-primary data-[state=active]:text-accent-foreground h-full hover:text-accent-foreground"
+                                className="data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-b-primary data-[state=active]:text-accent-foreground h-full hover:text-accent-foreground"
                             >
                                 <FileVideoIcon />
                                 Recording
                             </TabsTrigger>
                             <TabsTrigger
                                 value="chat"
-                                className="data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-b-primary data-[state=active]:text-accent-foreground h-full hover:text-accent-foreground"
+                                className="data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-b-primary data-[state=active]:text-accent-foreground h-full hover:text-accent-foreground"
                             >
                                 <SparklesIcon />
                                 Ask AI
@@ -52,6 +54,12 @@ export const CompletedState = ({ data }: Props) => {
                         <ScrollBar orientation="horizontal" />
                     </ScrollArea>
                 </div>
+                <TabsContent value="chat">
+                    <ChatProvider meetingId={data.id} meetingName={data.name} />
+                </TabsContent>
+                <TabsContent value="transcript">
+                    <Transcript meetingId={data.id} />
+                </TabsContent>
                 <TabsContent value="recording">
                     <div className="bg-white rounded-lg border px-4 py-5">
                         <video
@@ -63,7 +71,7 @@ export const CompletedState = ({ data }: Props) => {
                 </TabsContent>
                 <TabsContent value="summary">
                     <div className="bg-white rounded-lg border">
-                        <div className="px-4 py-5 flex flex-col col-span-5">
+                        <div className="px-4 py-5 flex flex-col col-span-5 gap-y-4">
                             <h2 className="text-2xl font-medium capitalize">
                                 {data.name}
                             </h2>

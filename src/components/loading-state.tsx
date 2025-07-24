@@ -3,6 +3,7 @@ import { Loader2Icon } from "lucide-react";
 interface LoadingStateProps {
     title: string;
     description: string;
+    className?: string;
 };
 
 export const LoadingState = ({
