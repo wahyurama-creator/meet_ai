@@ -45,7 +45,7 @@ export const CallConnect = ({
                 maxConnectUserRetries: 2,
                 timeoutErrorMessage: "Connection timeout",
                 timeout: 6000,
-                onConnectUserError: (err, _) => {
+                onConnectUserError: (err) => {
                     setError(err.message);
                 }
             }

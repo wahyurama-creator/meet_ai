@@ -4,7 +4,7 @@ import JSONL from "jsonl-parse-stringify";
 import { db } from "@/db";
 import { agents, meetings, user } from "@/db/schema";
 import { eq, inArray } from "drizzle-orm";
-import { Agent, AgentResult, createAgent, openai, StateData, TextMessage } from "@inngest/agent-kit";
+import { AgentResult, createAgent, openai, TextMessage } from "@inngest/agent-kit";
 
 const summarizer = createAgent({
     name: "summarizer",
@@ -96,18 +96,11 @@ export const meetingsProcessing = inngest.createFunction(
                 "Summarize the following transcript: " +
                 JSON.stringify(transcriptWithSpeakers)
             )
-        } catch (error: any) {
+        } catch (error) {
             let errorMessage: string = "Unknown error occured";
 
-            try {
-                if (typeof error.stack === "string") {
-                    const parsed = JSON.parse(error.stack);
-                    errorMessage = parsed?.error?.message || error.stack;
-                } else if (error.message) {
-                    errorMessage = error.message;
-                }
-            } catch (e) {
-                errorMessage = error?.message || "Unparsable error";
+            if (error instanceof Error) {
+                errorMessage = error.message;
             }
 
             await step.run("mark-failed", async () => {

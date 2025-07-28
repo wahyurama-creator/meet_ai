@@ -30,7 +30,7 @@ export const UpgradeView = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {
                         products.map((product) => {
-                            const isCurrentProduct = currentSubscription?.id === product.id;
+                            // const isCurrentProduct = currentSubscription?.id === product.id;
                             const isPremium = !!currentSubscription;
 
                             let buttonText = "Upgrade";
